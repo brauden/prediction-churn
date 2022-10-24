@@ -8,7 +8,7 @@ from src_imdb import predict_sentiment
 import numpy as np
 import torch
 
-def distillation(teacher_model, alpha):
+def anchor(teacher_model, alpha):
   x_train_new, _, _, y_train_new, _, _ = load_imdb.load_imdb(35_000)
   x_train, _, _, y_train, _, _ = load_imdb.load_imdb()
 
@@ -29,10 +29,14 @@ def distillation(teacher_model, alpha):
   pred_label = np.array([[1-j, j] if i ==1 else [j, 1-j] for i,j in pred_lst])
   dist = []
   for true_l, pred_l in zip(true_label_trn, pred_label):
-    c = (1 - alpha) * true_l + alpha * pred_l
+    pred_class = np.where(pred_l[0]>0.5,1,0)
+    if pred_class == true_l[0]:
+        c = (1 - alpha) * true_l + alpha * pred_l
+    else:
+        c = true_l
     dist.append(c)
   return [np.array(dist),pred_label]
 
 
 if __name__ == '__main__':
-    distillation()
+    anchor()
