@@ -33,12 +33,14 @@ class NewsSplitPreprocess:
         train_size: float = 0.7,
         validation: bool = True,
         validation_size: float = 0.3,
+        scale: bool = True
     ) -> None:
         self.data = data
         self.seed = seed
         self.train_size = train_size
         self.val_size = validation_size
         self.validation = validation
+        self.scale = scale
         self.scaler = StandardScaler()
 
     def _split_preprocess_news(self) -> tuple[np.ndarray, ...]:
@@ -47,8 +49,9 @@ class NewsSplitPreprocess:
         )
         x_train, y_train = train_df.iloc[:, :-1], train_df.iloc[:, -1]
         x_test, y_test = test_df.iloc[:, :-1], test_df.iloc[:, -1]
-        x_train = self.scaler.fit_transform(x_train)
-        x_test = self.scaler.transform(x_test)
+        if self.scale:
+            x_train = self.scaler.fit_transform(x_train)
+            x_test = self.scaler.transform(x_test)
         if not self.validation:
             return x_train, y_train.to_numpy(), x_test, y_test.to_numpy()
         else:
@@ -56,11 +59,11 @@ class NewsSplitPreprocess:
                 x_train, y_train, random_state=self.seed, test_size=self.val_size
             )
             return (
-                x_train,
+                x_train.to_numpy() if not self.scale else x_train,
                 y_train.to_numpy(),
-                x_val,
+                x_val.to_numpy() if not self.scale else x_val,
                 y_val.to_numpy(),
-                x_test,
+                x_test.to_numpy() if not self.scale else x_test,
                 y_test.to_numpy(),
             )
 
