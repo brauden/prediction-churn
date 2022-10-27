@@ -46,7 +46,7 @@ def train_baseline(
 
             if teacher_model:
                 y_teacher = teacher_model(X)
-                y_distill = alpha * y_teacher + (1. - alpha) * y
+                y_distill = alpha * y_teacher.softmax(1) + (1. - alpha) * y
                 y_distill.to(device)
 
             if y_distill is not None:
