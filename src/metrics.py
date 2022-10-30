@@ -12,7 +12,7 @@ class ChurnMetric:
     Super class for metrics. 
     """
     def __init__(self, tensor_type="numpy") -> None:
-        tensor_types = {"numpy": numpy.ndarray, "torch": torch.Tensor}
+        tensor_types = {"numpy": np.ndarray, "torch": torch.Tensor}
         if tensor_type not in tensor_types:
             raise NotImplementedError("Unknown object type")
         self.tensor_type = tensor_types[tensor_type]
@@ -44,14 +44,14 @@ class Churn(ChurnMetric):
     Will take argmax if multiple columns.
     """
     def __init__(self, tensor_type="numpy", output_mode="proportion") -> None:
-        super().__init__(tensor_type=tensor_type)
-        if output_mode not in {"proportion", "count"}:
+        super(Churn, self).__init__(tensor_type=tensor_type)
+        if output_mode not in {"proportion", "count"}: 
             raise ValueError("Unknown output_mode")
         self.output_mode = output_mode
     
     def __call__(self, predA: Union[np.ndarray, torch.Tensor], predB:Union[np.ndarray, torch.Tensor]) -> None:
-        self.call_sanitize_inputs(predA, predB)
-        predA, predB = self.reshape_argmax(predA, predB)
+        self.call_sanitize_inputs(predA=predA, predB=predB)
+        predA, predB = self.reshape_argmax(predA=predA, predB=predB)
         
         churn = sum(predA!=predB)
 
@@ -59,7 +59,6 @@ class Churn(ChurnMetric):
             return churn / predA.shape[0]
         if self.output_mode == "count":
             return churn
-
 
 class WinLossRatio(ChurnMetric):
     """
