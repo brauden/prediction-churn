@@ -18,7 +18,7 @@ if __name__ == "__main__":
     PATH = "../data/OnlineNewsPopularity/OnlineNewsPopularity.csv"
     BATCH_SIZE = 64
     EPOCHS = 10
-
+    # Split the data
     news_df = prp.load_news_df(PATH)
     split_data = prp.NewsSplitPreprocess(news_df, validation=False, train_size=30_000)
     data = split_data()
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     )
     val_dataloader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True)
     test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE)
-
+    # Experiments start
     with mlflow.start_run(run_name="Knowledge distillation"):
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -91,18 +91,19 @@ if __name__ == "__main__":
         )
         teacher_model.eval()
         baseline_model.eval()
-        teacher_pred = teacher_model(x_test)
+        teacher_pred = teacher_model(x_test).softmax(1).argmax(1).to("cpu").numpy()
         baseline_pred = baseline_model(x_test)
         baseline_churn = 1.0 - accuracy_score(
-            teacher_pred.softmax(1).argmax(1).to("cpu").numpy(),
+            teacher_pred,
             baseline_pred.softmax(1).argmax(1).to("cpu").numpy(),
-        )  # Baseline churn is 10.5%
+        )
         mlflow.log_metric(key="baseline_churn", value=baseline_churn)
         mlflow.pytorch.log_model(teacher_model, "teacher_model")
 
         # Distillation
         alphas = [0.2, 0.4, 0.6, 0.8]
 
+        y_test = y_test.to("cpu").numpy()
         for alpha in alphas:
             student_model = NewsFCNN().to(device)
             student_loss_fn = nn.CrossEntropyLoss()
@@ -121,11 +122,24 @@ if __name__ == "__main__":
             )
 
             student_model.eval()
-            student_pred = student_model(x_test)
+            student_pred = student_model(x_test).softmax(1).argmax(1).to("cpu").numpy()
             distillation_churn = 1.0 - accuracy_score(
-                teacher_pred.softmax(1).argmax(1).to("cpu").numpy(),
-                student_pred.softmax(1).argmax(1).to("cpu").numpy(),
+                teacher_pred,
+                student_pred,
             )
+            good_churn = (
+                (y_test != teacher_pred) & (y_test == student_pred)
+            ).sum() / len(y_test)
+            bad_churn = (
+                (y_test == teacher_pred) & (y_test != student_pred)
+            ).sum() / len(y_test)
             mlflow.log_metric(key=f"distilled_churn", value=distillation_churn)
+            mlflow.log_metric(key="good_churn", value=good_churn)
+            mlflow.log_metric(key="bad_churn", value=bad_churn)
+            mlflow.log_metric(key="win_loss_ratio", value=good_churn / bad_churn)
+            mlflow.log_metric(
+                key="churn_ratio", value=distillation_churn / baseline_churn
+            )
             mlflow.pytorch.log_model(student_model, f"student_model_{alpha}")
+
             print(f"alpha={alpha} | churn={distillation_churn}")
