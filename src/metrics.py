@@ -68,7 +68,7 @@ class WinLossRatio(ChurnMetric):
         super().__init__(tensor_type)
     
     def __call__(self, true_labels, pred_teacher, pred_student):
-        self.call_sanitize_inputs(true_labels, pred_teacher, pred_student)
+        self.call_sanitize_inputs(true_labels=true_labels, pred_teacher=pred_teacher, pred_student=pred_student)
         true_labels, pred_teacher, pred_student = self.reshape_argmax(true_labels, pred_teacher, pred_student)
         
         pred_teacher = pred_teacher == true_labels
@@ -83,7 +83,7 @@ class ChurnRatio(ChurnMetric):
         super().__init__(tensor_type)
     
     def __call__(self, pred_teacher, pred_student, pred_control):
-        self.call_sanitize_inputs(pred_teacher, pred_student, pred_control)
+        self.call_sanitize_inputs(pred_teacher=pred_teacher, pred_student=pred_student, pred_control=pred_control)
         pred_teacher, pred_student, pred_control = self.reshape_argmax(pred_teacher, pred_student, pred_control)
 
         churnratio = sum(pred_student!=pred_teacher) / sum(pred_control!=pred_teacher)
@@ -103,7 +103,7 @@ class GoodBadChurn(ChurnMetric):
         self.output_mode = output_mode
 
     def __call__(self, true_labels, pred_teacher, pred_student):
-        self.call_sanitize_inputs(true_labels, pred_teacher, pred_student)
+        self.call_sanitize_inputs(true_labels=true_labels, pred_teacher=pred_teacher, pred_student=pred_student)
         true_labels, pred_teacher, pred_student = self.reshape_argmax(true_labels, pred_teacher, pred_student)
      
         if self.mode == "good":
