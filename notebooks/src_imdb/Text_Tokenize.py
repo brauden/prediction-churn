@@ -7,12 +7,11 @@ def tokenize(vocab: dict, example: str)-> list:
     :param example: a string of text.
     :return: a list of token indices.
     """
-    # Your code here.
     lst_inx = [vocab[word] if word in vocab.keys() else 1 for word in example.lower().split() ]
     return lst_inx
 
 
-class IMDB(Dataset):
+class Text_Tokenize(Dataset):
     def __init__(self, x, y, vocab, max_length=256) -> None:
         """
         :param x: list of reviews
@@ -27,11 +26,10 @@ class IMDB(Dataset):
 
     def __getitem__(self, idx: int):
         """
-        Return the tokenized review and label by the given index.
+        Return the tokenized text and label by the given index.
         :param idx: index of the sample.
         :return: a dictionary containing three keys: 'ids', 'length', 'label' which represent the list of token ids, the length of the sequence, the binary label.
         """
-        # Add your code here.
         dic_token = {}
         lst_token = tokenize(self.vocab,self.x[idx])
         lst_token = lst_token[:self.max_length]

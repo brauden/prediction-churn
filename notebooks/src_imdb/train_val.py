@@ -9,9 +9,9 @@ import torch.nn as nn
 import os
 from sklearn.preprocessing import OneHotEncoder
 
-from src_imdb import load_imdb
+from proofpoint.notebooks.src_imdb import load_data_train_split
 from src_imdb import build_vocab
-from src_imdb import IMDB
+from proofpoint.notebooks.src_imdb import Text_Tokenize
 from src_imdb import LSTM
 
 
@@ -99,14 +99,13 @@ class ConstantWithWarmup(torch.optim.lr_scheduler._LRScheduler):
 # the folder where the trained model is saved
 CHECKPOINT_FOLDER = "./saved_model"
 
-def train_and_test_model_with_hparams(hparams, model_type="lstm",new_data:int = 30_000,distil = None, **kwargs): #
-    # Seeding. DO NOT TOUCH! DO NOT TOUCH hparams.SEED!
-    # Set the random seeds.
+def train_and_test_model_with_hparams(data, hparams, model_type="lstm",distil = None, **kwargs): #
+
     torch.manual_seed(hparams.SEED)
     random.seed(hparams.SEED)
     # np.random.seed(hparams.SEED)
 
-    x_train, x_valid, x_test, y_train, y_valid, y_test = load_imdb.load_imdb(new_data)
+    x_train, x_valid, x_test, y_train, y_valid, y_test = load_data_train_split.load_data_train_split(data)
 
     one_hot = OneHotEncoder()
 
@@ -138,9 +137,9 @@ def train_and_test_model_with_hparams(hparams, model_type="lstm",new_data:int = 
     vocab = build_vocab.build_vocab(x_train, hparams=hparams)
     vocab_size = len(vocab)
 
-    train_data = IMDB.IMDB(x_train, y_train, vocab, hparams.MAX_LENGTH)
-    valid_data = IMDB.IMDB(x_valid, y_valid, vocab, hparams.MAX_LENGTH)
-    test_data = IMDB.IMDB(x_test, y_test, vocab, hparams.MAX_LENGTH)
+    train_data = Text_Tokenize.Text_Tokenize(x_train, y_train, vocab, hparams.MAX_LENGTH)
+    valid_data = Text_Tokenize.Text_Tokenize(x_valid, y_valid, vocab, hparams.MAX_LENGTH)
+    test_data = Text_Tokenize.Text_Tokenize(x_test, y_test, vocab, hparams.MAX_LENGTH)
 
     collate = functools.partial(collate_fn, pad_index=hparams.PAD_INDEX)
 
