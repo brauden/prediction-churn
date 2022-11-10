@@ -9,9 +9,9 @@ import torch.nn as nn
 import os
 from sklearn.preprocessing import OneHotEncoder
 
-from proofpoint.notebooks.src_imdb import load_data_train_split
+from src_imdb import load_data_train_split
 from src_imdb import build_vocab
-from proofpoint.notebooks.src_imdb import Text_Tokenize
+from src_imdb import Text_Tokenize
 from src_imdb import LSTM
 
 

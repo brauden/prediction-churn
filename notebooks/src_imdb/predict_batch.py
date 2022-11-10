@@ -1,6 +1,6 @@
 from sklearn.preprocessing import OneHotEncoder
 
-from proofpoint.notebooks.src_imdb import load_data_train_split
+from src_imdb import load_data_train_split
 from src_imdb import build_vocab
 from src_imdb import HyperParams
 from src_imdb import predict_sentiment
