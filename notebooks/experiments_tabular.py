@@ -1,3 +1,4 @@
+import random
 import mlflow
 import numpy as np
 import pandas as pd
@@ -13,13 +14,14 @@ from sklearn.metrics import accuracy_score
 
 if __name__ == "__main__":
 
-    torch.manual_seed(1234)
+    # torch.manual_seed(1234)
+    SEED = random.randint(1, 10_000_000)
     PATH = "../data/OnlineNewsPopularity/OnlineNewsPopularity.csv"
     BATCH_SIZE = 64
     EPOCHS = 10
     # Split the data
     news_df = prp.load_news_df(PATH)
-    split_data = prp.NewsSplitPreprocess(news_df, validation=False, train_size=30_000)
+    split_data = prp.NewsSplitPreprocess(news_df, seed=SEED, validation=False, train_size=30_000)
     data = split_data()
 
     x_train, y_train = data[:2]  # Initial split
@@ -30,6 +32,7 @@ if __name__ == "__main__":
         train_size=20_000,
         validation_size=5_000,
         scale=False,
+        seed=SEED,
     )
     further_split_data = further_split()
     x_train_old, y_train_old = further_split_data[:2]
@@ -91,12 +94,16 @@ if __name__ == "__main__":
         teacher_model.eval()
         baseline_model.eval()
         teacher_pred = teacher_model(x_test).softmax(1).argmax(1).to("cpu").numpy()
-        baseline_pred = baseline_model(x_test)
+        baseline_pred = baseline_model(x_test).softmax(1).argmax(1).to("cpu").numpy()
         baseline_churn = 1.0 - accuracy_score(
             teacher_pred,
-            baseline_pred.softmax(1).argmax(1).to("cpu").numpy(),
+            baseline_pred,
+        )
+        baseline_accuracy = accuracy_score(
+            y_test.to("cpu"), baseline_pred
         )
         mlflow.log_metric(key="baseline_churn", value=baseline_churn)
+        mlflow.log_metric(key="baseline_accuracy", value=baseline_accuracy)
         mlflow.pytorch.log_model(teacher_model, "teacher_model")
 
         # Distillation
@@ -132,6 +139,10 @@ if __name__ == "__main__":
             bad_churn = (
                 (y_test == teacher_pred) & (y_test != student_pred)
             ).sum() / len(y_test)
+            accuracy_dist = accuracy_score(
+                y_test,
+                student_pred
+            )
             mlflow.log_metric(key=f"distilled_churn", value=distillation_churn)
             mlflow.log_metric(key="good_churn", value=good_churn)
             mlflow.log_metric(key="bad_churn", value=bad_churn)
@@ -139,6 +150,7 @@ if __name__ == "__main__":
             mlflow.log_metric(
                 key="churn_ratio", value=distillation_churn / baseline_churn
             )
+            mlflow.log_metric(key="accuracy_dist", value=accuracy_dist)
             mlflow.pytorch.log_model(student_model, f"student_model_{alpha}")
 
             print(f"alpha={alpha} | churn={distillation_churn}")
