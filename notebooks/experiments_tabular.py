@@ -1,12 +1,11 @@
-import torch
 import mlflow
 import numpy as np
 import pandas as pd
 import torch.cuda
 
-from src import preprocessing as prp
-from src.models import NewsFCNN
-from src.distillation import train_baseline
+from src.tabular import preprocessing as prp
+from src.tabular.models import NewsFCNN
+from src.tabular.distillation import train_baseline
 from torch.utils.data import DataLoader
 from torch import nn
 from sklearn.metrics import accuracy_score
