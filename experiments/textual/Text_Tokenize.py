@@ -1,13 +1,16 @@
 from torch.utils.data import Dataset
 
-def tokenize(vocab: dict, example: str)-> list:
+
+def tokenize(vocab: dict, example: str) -> list:
     """
     Tokenize the give example string into a list of token indices.
     :param vocab: dict, the vocabulary.
     :param example: a string of text.
     :return: a list of token indices.
     """
-    lst_inx = [vocab[word] if word in vocab.keys() else 1 for word in example.lower().split() ]
+    lst_inx = [
+        vocab[word] if word in vocab.keys() else 1 for word in example.lower().split()
+    ]
     return lst_inx
 
 
@@ -31,11 +34,11 @@ class Text_Tokenize(Dataset):
         :return: a dictionary containing three keys: 'ids', 'length', 'label' which represent the list of token ids, the length of the sequence, the binary label.
         """
         dic_token = {}
-        lst_token = tokenize(self.vocab,self.x[idx])
-        lst_token = lst_token[:self.max_length]
-        dic_token['ids'] = lst_token
-        dic_token['label'] = self.y[idx] 
-        dic_token['length'] = len(lst_token)
+        lst_token = tokenize(self.vocab, self.x[idx])
+        lst_token = lst_token[: self.max_length]
+        dic_token["ids"] = lst_token
+        dic_token["label"] = self.y[idx]
+        dic_token["length"] = len(lst_token)
 
         return dic_token
 

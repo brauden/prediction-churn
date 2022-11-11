@@ -1,13 +1,14 @@
 from nltk.corpus import stopwords
 
+
 class HyperParams:
     def __init__(self):
         # Constance hyperparameters. They have been tested and don't need to be tuned.
         self.PAD_INDEX = 0
         self.UNK_INDEX = 1
-        self.PAD_TOKEN = '<pad>'
-        self.UNK_TOKEN = '<unk>'
-        self.STOP_WORDS = set(stopwords.words('english'))
+        self.PAD_TOKEN = "<pad>"
+        self.UNK_TOKEN = "<unk>"
+        self.STOP_WORDS = set(stopwords.words("english"))
         self.MAX_LENGTH = 256
         self.BATCH_SIZE = 96
         self.EMBEDDING_DIM = 1
@@ -22,5 +23,6 @@ class HyperParams:
         self.BIDIRECTIONAL = False
         self.SEED = 2
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     HyperParams()
