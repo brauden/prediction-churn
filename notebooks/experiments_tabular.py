@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 import torch.cuda
 
-from src.tabular import preprocessing as prp
-from src.tabular.models import NewsFCNN
-from src.tabular.distillation import train_baseline
+from experiments.tabular import preprocessing as prp
+from experiments.tabular.models import NewsFCNN
+from experiments.tabular.distillation import train_baseline
 from torch.utils.data import DataLoader
 from torch import nn
 from sklearn.metrics import accuracy_score
