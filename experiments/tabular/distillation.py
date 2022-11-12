@@ -8,7 +8,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 
-def train_baseline(
+def train_distillation(
     train_dloader: DataLoader,
     val_dloader: DataLoader,
     student_model: nn.Module,
