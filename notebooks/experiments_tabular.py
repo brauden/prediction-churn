@@ -6,7 +6,8 @@ import torch.cuda
 
 from experiments.tabular import preprocessing as prp
 from experiments.tabular.models import NewsFCNN
-from experiments.tabular.distillation import train_baseline
+from experiments.tabular.distillation import train_distillation
+from experiments.tabular.anchor import train_anchor
 from torch.utils.data import DataLoader
 from torch import nn
 from sklearn.metrics import accuracy_score
@@ -21,7 +22,9 @@ if __name__ == "__main__":
     EPOCHS = 10
     # Split the data
     news_df = prp.load_news_df(PATH)
-    split_data = prp.NewsSplitPreprocess(news_df, seed=SEED, validation=False, train_size=30_000)
+    split_data = prp.NewsSplitPreprocess(
+        news_df, seed=SEED, validation=False, train_size=30_000
+    )
     data = split_data()
 
     x_train, y_train = data[:2]  # Initial split
@@ -66,7 +69,7 @@ if __name__ == "__main__":
         baseline_loss_fn = nn.CrossEntropyLoss()
         baseline_optimizer = torch.optim.Adam(baseline_model.parameters(), lr=1e-3)
 
-        train_baseline(
+        train_distillation(
             train_old_dataloader,
             val_dataloader,
             teacher_model,
@@ -77,7 +80,7 @@ if __name__ == "__main__":
             EPOCHS,
         )
 
-        train_baseline(
+        train_distillation(
             train_new_dataloader,
             val_dataloader,
             baseline_model,
@@ -99,9 +102,7 @@ if __name__ == "__main__":
             teacher_pred,
             baseline_pred,
         )
-        baseline_accuracy = accuracy_score(
-            y_test.to("cpu"), baseline_pred
-        )
+        baseline_accuracy = accuracy_score(y_test.to("cpu"), baseline_pred)
         mlflow.log_metric(key="baseline_churn", value=baseline_churn)
         mlflow.log_metric(key="baseline_accuracy", value=baseline_accuracy)
         mlflow.pytorch.log_model(teacher_model, "teacher_model")
@@ -111,14 +112,22 @@ if __name__ == "__main__":
 
         y_test = y_test.to("cpu").numpy()
         for alpha in alphas:
-            student_model = NewsFCNN().to(device)
+            student_model_dist = NewsFCNN().to(device)
             student_loss_fn = nn.CrossEntropyLoss()
-            student_optimizer = torch.optim.Adam(student_model.parameters(), lr=1e-3)
+            student_optimizer = torch.optim.Adam(
+                student_model_dist.parameters(), lr=1e-3
+            )
 
-            train_baseline(
+            student_model_anc = NewsFCNN().to(device)
+            student_loss_fn_anc = nn.CrossEntropyLoss()
+            student_optimizer_anc = torch.optim.Adam(
+                student_model_anc.parameters(), lr=1e-3
+            )
+
+            train_distillation(
                 train_new_dataloader,
                 val_dataloader,
-                student_model,
+                student_model_dist,
                 student_optimizer,
                 student_loss_fn,
                 teacher_model,
@@ -127,8 +136,22 @@ if __name__ == "__main__":
                 alpha=alpha,
             )
 
-            student_model.eval()
-            student_pred = student_model(x_test).softmax(1).argmax(1).to("cpu").numpy()
+            train_anchor(
+                train_new_dataloader,
+                val_dataloader,
+                student_model_anc,
+                student_optimizer_anc,
+                student_loss_fn_anc,
+                teacher_model,
+                device,
+                EPOCHS,
+                alpha=alpha,
+            )
+
+            student_model_dist.eval()
+            student_pred = (
+                student_model_dist(x_test).softmax(1).argmax(1).to("cpu").numpy()
+            )
             distillation_churn = 1.0 - accuracy_score(
                 teacher_pred,
                 student_pred,
@@ -139,18 +162,38 @@ if __name__ == "__main__":
             bad_churn = (
                 (y_test == teacher_pred) & (y_test != student_pred)
             ).sum() / len(y_test)
-            accuracy_dist = accuracy_score(
-                y_test,
-                student_pred
-            )
+            accuracy_dist = accuracy_score(y_test, student_pred)
             mlflow.log_metric(key=f"distilled_churn", value=distillation_churn)
-            mlflow.log_metric(key="good_churn", value=good_churn)
-            mlflow.log_metric(key="bad_churn", value=bad_churn)
-            mlflow.log_metric(key="win_loss_ratio", value=good_churn / bad_churn)
+            mlflow.log_metric(key="good_churn_dist", value=good_churn)
+            mlflow.log_metric(key="bad_churn_dist", value=bad_churn)
+            mlflow.log_metric(key="win_loss_ratio_dist", value=good_churn / bad_churn)
             mlflow.log_metric(
-                key="churn_ratio", value=distillation_churn / baseline_churn
+                key="churn_ratio_dist", value=distillation_churn / baseline_churn
             )
             mlflow.log_metric(key="accuracy_dist", value=accuracy_dist)
-            mlflow.pytorch.log_model(student_model, f"student_model_{alpha}")
+            mlflow.pytorch.log_model(student_model_dist, f"student_model_{alpha}")
 
             print(f"alpha={alpha} | churn={distillation_churn}")
+
+            student_model_anc.eval()
+            student_pred = (
+                student_model_anc(x_test).softmax(1).argmax(1).to("cpu").numpy()
+            )
+            anchor_churn = 1.0 - accuracy_score(
+                teacher_pred,
+                student_pred,
+            )
+            good_churn = (
+                (y_test != teacher_pred) & (y_test == student_pred)
+            ).sum() / len(y_test)
+            bad_churn = (
+                (y_test == teacher_pred) & (y_test != student_pred)
+            ).sum() / len(y_test)
+            accuracy_anc = accuracy_score(y_test, student_pred)
+            mlflow.log_metric(key=f"anchor_churn", value=anchor_churn)
+            mlflow.log_metric(key="good_churn_anc", value=good_churn)
+            mlflow.log_metric(key="bad_churn_anc", value=bad_churn)
+            mlflow.log_metric(key="win_loss_ratio_anc", value=good_churn / bad_churn)
+            mlflow.log_metric(key="churn_ratio_anc", value=anchor_churn / baseline_churn)
+            mlflow.log_metric(key="accuracy_anc", value=accuracy_anc)
+            mlflow.pytorch.log_model(student_model_anc, f"student_model_anc_{alpha}")
