@@ -16,7 +16,7 @@ from experiments.tabular.churn import Train, Distillation, AnchorRCP, experiment
 if __name__ == "__main__":
     # Params
     SEED = random.randint(1, 10_000_000)
-    PATH = "../../data/OnlineNewsPopularity/OnlineNewsPopularity.csv"
+    PATH = "data/OnlineNewsPopularity/OnlineNewsPopularity.csv"
     BATCH_SIZE = 64
     EPOCHS = 5
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
