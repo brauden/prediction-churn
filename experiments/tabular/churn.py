@@ -20,7 +20,6 @@ class Distillation(ChurnReduction):
     def __init__(self, device: str, lambda_: float = 0.5) -> None:
         super(Distillation, self).__init__(device=device)
         self.lambda_ = lambda_
-        self.device = device
 
     def transform(self, y_true: torch.Tensor, y_pred: torch.Tensor) -> torch.Tensor:
         y_distill = self.lambda_ * y_pred.softmax(1) + (1.0 - self.lambda_) * y_true
@@ -41,8 +40,13 @@ class AnchorRCP(ChurnReduction):
         y_rcp = torch.where(
             y_pred.softmax(1).round() == y_true,
             self.alpha * y_pred.softmax(1) + (1.0 - self.alpha) * y_true,
-            self.alpha * y_true
-            + self.alpha / self.classes * torch.ones((len(y_true), self.classes)),
+            self.eps
+            * (
+                self.alpha * y_true
+                + self.alpha
+                / self.classes
+                * torch.ones((len(y_true), self.classes)).to(self.device)
+            ),
         )
         return y_rcp
 
@@ -53,19 +57,22 @@ class Train:
         train_dataloader: torch.utils.data.DataLoader,
         val_dataloader: Optional[torch.utils.data.DataLoader],
         student_model: nn.Module,
-        student_loss: nn.Module,
-        student_optimizer: torch.optim.Optimizer,
+        student_loss: nn.Module = nn.CrossEntropyLoss(),
+        student_optimizer: torch.optim.Optimizer = torch.optim.Adam,
         teacher_model: Optional[nn.Module] = None,
         churn_transform: Optional[ChurnReduction] = None,
         device: str = "cpu",
         epochs: int = 10,
+        lr: float = 1e-3,
     ) -> None:
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
         self.student_model = student_model
         self.teacher_model = teacher_model
         self.student_loss = student_loss
-        self.student_optimizer = student_optimizer
+        self.student_optimizer = student_optimizer(
+            self.student_model.parameters(), lr=lr
+        )
         self.churn_transform = churn_transform
         self.device = device
         self.epochs = epochs
@@ -81,7 +88,7 @@ class Train:
 
             for batch, (x, y) in tqdm(enumerate(self.train_dataloader)):
                 x, y = x.to(torch.float), y.to(torch.float)
-                x, y = x.to(self.device), y.to(torch.device)
+                x, y = x.to(self.device), y.to(self.device)
 
                 y_transformed = None
                 if (self.teacher_model is not None) and (
@@ -126,30 +133,41 @@ class Train:
                     f"Test Error: \n Accuracy: {(100 * correct):>0.1f}%, Avg loss: {test_loss:>8f} \n"
                 )
 
+    def model_mode(self, mode: str = "eval") -> None:
+        if mode == "eval":
+            self.student_model.eval()
+        elif mode == "train":
+            self.student_model.train()
+        else:
+            raise ValueError("mode param has to be in {eval, train}")
+
+    def __call__(self, inputs: torch.Tensor) -> torch.Tensor:
+        self.model_mode("eval")
+        return self.student_model(inputs)
+
+    @property
+    def get_model(self):
+        return self.student_model
+
 
 def experiment_metrics(
-    y_true: torch.Tensor,
-    y_teacher: torch.Tensor,
-    y_pred: torch.Tensor,
-    baseline_churn: float,
+    y_true: torch.Tensor, y_teacher: torch.Tensor, y_pred: torch.Tensor
 ):
 
     y_teacher = y_teacher.softmax(1).argmax(1).to("cpu").numpy()
     y_pred = y_pred.softmax(1).argmax(1).to("cpu").numpy()
-    y_true = y_true.softmax(1).argmax(1).to("cpu").numpy()
+    y_true = y_true.to("cpu").numpy()
 
     churn = 1.0 - (y_teacher == y_pred).sum() / len(y_teacher)
     good_churn = ((y_true != y_teacher) & (y_true == y_pred)).sum() / len(y_true)
     bad_churn = ((y_true == y_teacher) & (y_true != y_pred)).sum() / len(y_true)
     win_loss_ratio = good_churn / bad_churn
-    churn_ratio = churn / baseline_churn
     accuracy = (y_true == y_pred).sum() / len(y_teacher)
     metrics = dict(
         churn=churn,
         good_churn=good_churn,
         bad_churn=bad_churn,
         win_loss_ratio=win_loss_ratio,
-        churn_ratio=churn_ratio,
         accuracy=accuracy,
     )
     return metrics
