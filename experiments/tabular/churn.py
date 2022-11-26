@@ -69,7 +69,7 @@ class AnchorRCP(ChurnReduction):
             self.alpha * y_pred.softmax(1) + (1.0 - self.alpha) * y_true,
             self.eps
             * (
-                self.alpha * y_true
+                (1. - self.alpha) * y_true
                 + self.alpha
                 / self.classes
                 * torch.ones((len(y_true), self.classes)).to(self.device)
