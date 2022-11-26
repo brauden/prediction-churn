@@ -125,3 +125,31 @@ class Train:
                 print(
                     f"Test Error: \n Accuracy: {(100 * correct):>0.1f}%, Avg loss: {test_loss:>8f} \n"
                 )
+
+
+def experiment_metrics(
+    y_true: torch.Tensor,
+    y_teacher: torch.Tensor,
+    y_pred: torch.Tensor,
+    baseline_churn: float,
+):
+
+    y_teacher = y_teacher.softmax(1).argmax(1).to("cpu").numpy()
+    y_pred = y_pred.softmax(1).argmax(1).to("cpu").numpy()
+    y_true = y_true.softmax(1).argmax(1).to("cpu").numpy()
+
+    churn = 1.0 - (y_teacher == y_pred).sum() / len(y_teacher)
+    good_churn = ((y_true != y_teacher) & (y_true == y_pred)).sum() / len(y_true)
+    bad_churn = ((y_true == y_teacher) & (y_true != y_pred)).sum() / len(y_true)
+    win_loss_ratio = good_churn / bad_churn
+    churn_ratio = churn / baseline_churn
+    accuracy = (y_true == y_pred).sum() / len(y_teacher)
+    metrics = dict(
+        churn=churn,
+        good_churn=good_churn,
+        bad_churn=bad_churn,
+        win_loss_ratio=win_loss_ratio,
+        churn_ratio=churn_ratio,
+        accuracy=accuracy,
+    )
+    return metrics
