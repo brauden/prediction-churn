@@ -1,3 +1,7 @@
+"""
+Knowledge distillation and anchor RCP labels transformations
+for prediction churn reduction.
+"""
 from abc import ABC, abstractmethod
 
 import torch
@@ -8,16 +12,31 @@ from torch.utils.data import DataLoader
 
 
 class ChurnReduction(ABC):
+    """
+    Abstract class for labels transformation
+    """
     def __init__(self, device: str) -> None:
         self.device = device
 
     @abstractmethod
     def transform(self, y_true: torch.Tensor, y_pred: torch.Tensor) -> torch.Tensor:
+        """
+        Returns transformed labels based on the particular implementation
+        :param y_true: one-hot encoded torch Tensor
+        :param y_pred: probabilty tensor
+        :return: transformed torch tensor
+        """
         ...
 
 
 class Distillation(ChurnReduction):
     def __init__(self, device: str, lambda_: float = 0.5) -> None:
+        """
+        :param device: cpu or cuda. Torch based implementation
+        :param lambda_: knowledge distillation hyperparam. May force
+        student model's predictions to mimic teacher's model predictions or
+        stick to the true labels.
+        """
         super(Distillation, self).__init__(device=device)
         self.lambda_ = lambda_
 
@@ -31,6 +50,14 @@ class AnchorRCP(ChurnReduction):
     def __init__(
         self, device: str, alpha: float = 0.5, eps: float = 1.0, classes: int = 2
     ) -> None:
+        """
+        :param device: cpu or cuda. Torch based implementation
+        :param alpha: similar to lambda param in knowledge distillation. Forces
+        new model to mimic the original one when predicted class is correct.
+        :param eps: When predicted class is not the same as teacher's model predictions
+        RCP multiplies the true tensor by eps.
+        :param classes: num of classes in classification task
+        """
         super(AnchorRCP, self).__init__(device=device)
         self.alpha = alpha
         self.eps = eps
@@ -52,6 +79,9 @@ class AnchorRCP(ChurnReduction):
 
 
 class Train:
+    """
+    Class for training models for tabular experiment.
+    """
     def __init__(
         self,
         train_dataloader: torch.utils.data.DataLoader,
@@ -152,7 +182,21 @@ class Train:
 
 def experiment_metrics(
     y_true: torch.Tensor, y_teacher: torch.Tensor, y_pred: torch.Tensor
-):
+) -> dict[str, float]:
+    """
+    Metrics that we track during our experiments:
+    1. Churn
+    2. Good churn
+    3. Bad churn
+    4. Win loss ratio
+    5. Accuracy
+
+    Churn ratio needs to be calculated separately.
+    :param y_true:
+    :param y_teacher:
+    :param y_pred:
+    :return:
+    """
 
     y_teacher = y_teacher.softmax(1).argmax(1).to("cpu").numpy()
     y_pred = y_pred.softmax(1).argmax(1).to("cpu").numpy()
