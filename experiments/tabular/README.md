@@ -22,3 +22,7 @@ mlflow ui
 4. models.py - model used in the experiments. Simple FFN.
 5. churn.py - churn reduction transformation: Knowledge distiallation and Anchor RCP, training procedure
 6. experiments_tabular.py - run experiment and log results to mlflow
+
+### Performance comparison
+![](../../data/distillation-rcp.png)
+![](../../data/anchor_heatmap.png)
