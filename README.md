@@ -49,9 +49,9 @@ In order to test churn reduction methods we conducted experiments using textual,
 5. $`WinLossRatio = \frac{GoodChurn(f_{old}, f_{new})}{BadChurn(f_{old}, f_{new})}`$
 
 ### Models <a name="Models"></a>
-- Images 
-- Text
+- Text: [LSTM](experiments/textual/LSTM.py)
 - Tabular: [Fully Connected Neural Network](experiments/tabular/models.py)
+- Images 
 
 ### Results <a name="Results"></a>
 
