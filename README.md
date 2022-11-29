@@ -2,7 +2,9 @@
 
 ## Table of content
 1. [Motivation](#Motivation)
-2. [Methods](#Methods)
+2. [Methods](#Methods)  
+   2.1 [Knowledge Distillation](#Distillation)  
+   2.2 [Anchor Method](#Anchor)  
 3. [Milestones](#Milestones)
 4. [Experiments](#Experiments)  
    4.1. [Experiment setup](#Experiment setup)  
@@ -27,7 +29,38 @@ Given the wide variety of machine learning models Proofpoint uses, they are inte
 The capstone project consists of three objectives. First, we will compare a unified approach and compare to three known approaches. Second, we will create a python package that generalizes our approach and is independent of underlying models. That will ensure that our clients can use the package in their environment. Finally, we will work on a novel churn reduction method.  
 
 ## Methods <a name="Methods"></a>
+### Knowledge Distillation <a name="Distillation"></a>
+Developed in 2015, knowledge distillation decreases the complexity of deep learning models by introducing a teacher model. After training a teacher model, a student model, which is usually much simpler, learns from the first model by parroting predictions by using transformed labels for training. In our context, knowledge distillation helps to reduce prediction churn. According to Heinrich Jiang et al.[1], knowledge distillation is equivalent under mild assumptions to constraint churn optimization. Since the constraint optimization approach is more involved, churn reduction using distillation is the first candidate for implementation. Label transformation for knowledge distillation is shown in the following equation:
+$$
+\hat{y} = \lambda\times y_{teacher} + (1 - \lambda) \times y_{true}
+$$
+The transformed labels are represented by $\hat{y}$, $y_{teacher}$ are the predictions of the teacher model taken from the softmax layer, $y_{true}$ are one-hot-encoded true labels. Given that there are $d$ classes, each vector from the equation belongs to $\mathbb{R}^{d}$. Finally, $\lambda \in (0, 1)$ is the only hyperparameter for this procedure.
 
+The training loop with knowledge distillation is depicted in the following scheme:
+
+
+### Anchor Method <a name="Anchor"></a>
+To our knowledge the anchor method for churn reduction is one of the first papers on the subject. In our work we use Regress to Corrected Prediction (RCP) operator which is only one of the approaches from the original paper. Anchor RCP method modifies the labels that subsequent models will be trained on using the following equation:
+
+$$
+\hat{y} = 
+\begin{cases}
+\alpha\times y_{teacher} + (1 -\alpha) \times y_{true}, \text{when } y_{teacher} = y_{true} \\
+\epsilon \times y_{true}, \text{otherwise} \\
+\end{cases}
+$$
+
+The notation is consistent with the knowledge distillation method. However, anchor RCP method uses two hyperparameters $\alpha, \epsilon \in [0, 1]$. Since the original paper is written for binary classification we use a slightly modified approach in our experiments:
+
+$$
+\hat{y} = 
+\begin{cases}
+\alpha\times y_{teacher} + (1 -\alpha) \times y_{true}, \text{when } y_{teacher} = y_{true} \\
+\epsilon \times ((1 - \alpha) \times y_{true} + \frac{\alpha}{d}\times \mathbb{1}), \text{where } d \text{ is number of classes and } \mathbb{1} \text{ is a sum vector} \\
+\end{cases}
+$$
+
+The training procedure for anchor RCP method:
 
 ## Milestones <a name="Milestones"></a>
 1. [x] Experiments and existing techniques implementation
