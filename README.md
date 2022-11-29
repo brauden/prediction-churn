@@ -57,10 +57,10 @@ In order to test churn reduction methods we conducted experiments using textual,
 
 
 ## Resources <a name="Resources"></a>
-1. [Churn Reduction via Distillation](https://arxiv.org/pdf/2106.02654.pdf)
-2. [Launch and Iterate: Reducing Prediction Churn](https://papers.nips.cc/paper/2016/file/dc5c768b5dc76a084531934b34601977-Paper.pdf)
-3. [Locally Adaptive Label Smoothing for Predictive Churn](https://arxiv.org/pdf/2102.05140.pdf)
-4. [Knowledge Distillation - Keras implementation](https://keras.io/examples/vision/knowledge_distillation/) 
+1. [Heinrich Jiang, Harikrishna Narasimhan, Dara Bahri, Andrew Cotter, Afshin Rostamizadeh. Churn Reduction via Distillation. *arXiv preprint arXiv: 2106.0265v2, 2022*](https://arxiv.org/pdf/2106.02654.pdf)
+2. [Q. Cormier, M. Milani Fard, K. Canini, M. R. Gupta. Launch and Iterate: Reducing Prediction Churn. *30th Conference on Neural Information Processing Systems (NIPS 2016)*](https://papers.nips.cc/paper/2016/file/dc5c768b5dc76a084531934b34601977-Paper.pdf)
+3. [Dara Bahri, Heinrich Jiang. Locally Adaptive Label Smoothing for Predictive Churn. *arXiv preprint arXiv: 2102.05140v2, 2021*](https://arxiv.org/pdf/2102.05140.pdf)
+4. [Kenneth Borup. Knowledge Distillation - Keras implementation. *keras.io, 2020*](https://keras.io/examples/vision/knowledge_distillation/) 
 
 ## Contributors <a name="Contributors"></a>
 [Dauren Bizhanov](https://linkedin.com/in/dauren-bizhanov)  
