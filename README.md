@@ -100,7 +100,6 @@ In order to test churn reduction methods we conducted experiments using textual,
 
 ## Contributors <a name="Contributors"></a>
 [Dauren Bizhanov](https://linkedin.com/in/dauren-bizhanov)  
-[Himangshu raj Bhatntana]()  
-[Satvik Kishore]()  
+[Himangshu raj Bhatntana](https://linkedin.com/in/himangshu-bhantana)  
+[Satvik Kishore](https://linkedin.com/in/satvik-kishore)  
 [Tigran Harutyunyan](https://linkedin/in/tigran-harutyunyan)  
-
