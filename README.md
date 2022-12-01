@@ -39,7 +39,7 @@ Developed in 2015, knowledge distillation decreases the complexity of deep learn
 The transformed labels are represented by $`\hat{y}`$, $`y_{teacher}`$ are the predictions of the teacher model taken from the softmax layer, $`y_{true}`$ are one-hot-encoded true labels. Given that there are $`d`$ classes, each vector from the equation belongs to $`\mathbb{R}^{d}`$. Finally, $`\lambda \in [0, 1]`$ is the only hyperparameter for this procedure.
 
 The training loop with knowledge distillation is depicted in the following scheme:
-
+![distillation](./data/figures/distillation_scheme.jpeg)
 
 ### Anchor Method <a name="Anchor"></a>
 To our knowledge the anchor method for churn reduction is one of the first papers on the subject. In our work we use Regress to Corrected Prediction (RCP) operator which is only one of the approaches from the original paper. Anchor RCP method modifies the labels that subsequent models will be trained on using the following equation:  
@@ -63,6 +63,7 @@ The notation is consistent with the knowledge distillation method. However, anch
 ```
 
 The training procedure for anchor RCP method:
+![anchor](./data/figures/anchor_scheme.jpeg)
 
 ## Milestones <a name="Milestones"></a>
 1. [x] Experiments and existing techniques implementation
