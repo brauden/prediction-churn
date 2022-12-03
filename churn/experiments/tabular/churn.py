@@ -184,7 +184,7 @@ def experiment_metrics(
     y_true: torch.Tensor, y_teacher: torch.Tensor, y_pred: torch.Tensor
 ) -> dict[str, float]:
     """
-    Metrics that we track during our experiments:
+    Metrics that we track during our churn:
     1. Churn
     2. Good churn
     3. Bad churn

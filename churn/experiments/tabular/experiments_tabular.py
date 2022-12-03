@@ -8,9 +8,9 @@ import torch
 
 from torch.utils.data import DataLoader
 
-from experiments.tabular import preprocessing as prp
-from experiments.tabular.models import NewsFCNN
-from experiments.tabular.churn import Train, Distillation, AnchorRCP, experiment_metrics
+from churn.tabular import preprocessing as prp
+from churn.tabular.models import NewsFCNN
+from churn.tabular.churn import Train, Distillation, AnchorRCP, experiment_metrics
 
 
 if __name__ == "__main__":

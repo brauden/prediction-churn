@@ -7,7 +7,7 @@ The data set used in this experiment: [news popularity](https://archive.ics.uci.
 
 The experiment has to be run from the root folder:
 ```shell
-python experiments/tabular/experiments_tabular.py
+python churn/tabular/experiments_tabular.py
 ```
 
 To open mlflow ui after the first run:
