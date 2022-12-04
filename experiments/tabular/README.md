@@ -7,7 +7,7 @@ The data set used in this experiment: [news popularity](https://archive.ics.uci.
 
 The experiment has to be run from the root folder:
 ```shell
-python churn/tabular/experiments_tabular.py
+python src/tabular/experiments_tabular.py
 ```
 
 To open mlflow ui after the first run:
@@ -46,5 +46,5 @@ The result of the experiments on the tabular data averaged across 10 runs:
 | Anchor       | alpha=0.8, eps=0.8 | 0.658    | 0.061 | 0.032      | 0.029     | 1.084          | 0.609       |
 | Anchor       | alpha=0.8, eps=1.0 | 0.658    | 0.068 | 0.035      | 0.033     | 1.074          | 0.676       |
 
-![](../../data/distillation-rcp.png)
-![](../../data/anchor_heatmap.png)
+![](../../data/figures/distillation-rcp.png)
+![](../../data/figures/anchor_heatmap.png)
