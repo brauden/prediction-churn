@@ -1,7 +1,7 @@
 import warnings
 from abc import ABC, abstractmethod
 
-from torch import Tensor, where, ones
+from torch import Tensor, ones, isclose, concat, gather, all as tall
 from numpy import ndarray
 
 
@@ -69,20 +69,22 @@ class AnchorRCP(ChurnTransform):
 
     def transform(self, y_true, y_base_model):
         y_true, y_base_model = self._prepare_tensors(y_true, y_base_model)
+        mask = tall(y_true == y_base_model.softmax(1).round(), axis=1)
+        combination = (
+            self.alpha * y_base_model.softmax(1)[mask]
+            + (1.0 - self.alpha) * y_true[mask]
+        )
         if self.smoothing:
-            y_rcp = where(
-                y_base_model.softmax(1).round() == y_true,
-                self.alpha * y_base_model.softmax(1) + (1.0 - self.alpha) * y_true,
-                self.eps
-                * (
-                    (1.0 - self.alpha) * y_true
-                    + self.alpha / self.classes * ones((len(y_true), self.classes))
-                ),
-            )
+            scaling = self.eps * (
+                1.0 - self.alpha
+            ) * y_true + self.alpha / self.classes * ones((len(y_true), self.classes))
         else:
-            y_rcp = where(
-                y_base_model.softmax(1).round() == y_true,
-                self.alpha * y_base_model.softmax(1) + (1.0 - self.alpha) * y_true,
-                self.eps * y_true,
-            )
-        return y_rcp
+            scaling = self.eps * y_true[~mask]
+        y_rcp = concat([combination, scaling])
+        indices = concat(
+            [
+                mask.nonzero().repeat(1, self.classes),
+                (mask == False).nonzero().repeat(1, self.classes),
+            ]
+        )
+        return gather(y_rcp, 0, indices.argsort(dim=0))
