@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import pytest
-from churn.transform import Distillation
+from churn import Distillation
 
 
 y_true = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]])

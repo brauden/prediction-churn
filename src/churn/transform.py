@@ -1,6 +1,5 @@
 import warnings
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from torch import Tensor, where, ones
 from numpy import ndarray
@@ -87,12 +86,3 @@ class AnchorRCP(ChurnTransform):
                 self.eps * y_true,
             )
         return y_rcp
-
-
-class ChurnTrain(ABC):
-    def __init__(self, transform: Optional[ChurnTransform]) -> None:
-        self.transform = transform
-
-    @abstractmethod
-    def fit(self):
-        ...
