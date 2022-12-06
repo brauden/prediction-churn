@@ -23,6 +23,7 @@ class ChurnTrain:
         optimizer: torch.optim.Optimizer,
         epochs: int,
         batch_size: int,
+        n_classes: int,
         transform: Optional[ChurnTransform],
         base_model: Optional[nn.Module],
         metrics,  # TODO: add churn related metrics
@@ -33,13 +34,17 @@ class ChurnTrain:
         self.train_data = (
             train_data
             if isinstance(train_data, DataLoader)
-            else self._create_dataloader(train_data, batch_size, shuffle_train)
+            else self._create_dataloader(
+                train_data, batch_size, shuffle_train, n_classes
+            )
         )
         if val_data is not None:
             self.val_data = (
                 val_data
                 if isinstance(val_data, DataLoader)
-                else self._create_dataloader(val_data, batch_size, shuffle_valid)
+                else self._create_dataloader(
+                    val_data, batch_size, shuffle_valid, n_classes
+                )
             )
         self.loss_fn = loss_fn
         self.optimizer = optimizer
@@ -48,6 +53,7 @@ class ChurnTrain:
         self.transform = transform
         self.base_model = base_model.eval() if base_model is not None else None
         self.metrics = metrics
+        self.n_classes = n_classes
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.history = {}
 
@@ -56,16 +62,23 @@ class ChurnTrain:
         train_data: tuple,
         batch_size: int,
         shuffle: bool,
+        n_classes: int,
     ) -> DataLoader:
         class _DataSet(Dataset):
-            def __init__(self, data: tuple):
-                self.x = data[0]
-                self.y = data[1]
+            def __init__(self, data: tuple, classes: int):
+                self.x = torch.tensor(data[0], dtype=torch.float32)
+                self.y = torch.tensor(data[1], dtype=torch.int64)
+                self.classes = classes
+
+            def __len__(self):
+                return len(self.x)
 
             def __getitem__(self, index) -> T_co:
-                return self.x[index], self.y[index]
+                return self.x[index], torch.nn.functional.one_hot(
+                    self.y[index], num_classes=self.classes
+                )
 
-        dset = _DataSet(train_data)
+        dset = _DataSet(train_data, n_classes)
         return DataLoader(dset, batch_size=batch_size, shuffle=shuffle)
 
     def train_step(self, x_train: Tensor, y_train: Tensor) -> float:
