@@ -8,9 +8,9 @@ import torch
 
 from torch.utils.data import DataLoader
 
-from experiments.tabular import preprocessing as prp
-from experiments.tabular.models import NewsFCNN
-from experiments.tabular.churn import Train, Distillation, AnchorRCP, experiment_metrics
+import preprocessing as prp
+from models import NewsFCNN
+from churn_exp import Train, Distillation, AnchorRCP, experiment_metrics
 
 
 if __name__ == "__main__":
@@ -107,7 +107,7 @@ if __name__ == "__main__":
                     y_test, teacher_pred, distillation_pred
                 )
                 distillation_metrics["churn_ratio_distillation"] = (
-                    distillation_metrics["src"] / baseline_metrics["src"]
+                    distillation_metrics["churn"] / baseline_metrics["churn"]
                 )
                 mlflow.log_metrics(distillation_metrics)
 
@@ -136,6 +136,6 @@ if __name__ == "__main__":
                 anchor_pred = anchor_train(x_test)
                 anchor_metrics = experiment_metrics(y_test, teacher_pred, anchor_pred)
                 anchor_metrics["churn_ratio_anchor"] = (
-                    anchor_metrics["src"] / baseline_metrics["src"]
+                    anchor_metrics["churn"] / baseline_metrics["churn"]
                 )
                 mlflow.log_metrics(anchor_metrics)
