@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 import torch
+import tqdm
 from numpy import ndarray
 from torch import Tensor
 from torch import nn
@@ -90,18 +91,10 @@ class ChurnTrain:
         self.optimizer.step()
         return loss.item()
 
-    def fit(self) -> dict:
-        train_losses = []
-        val_losses = []
-
-        self.model.to(self.device)
-
-        if self.base_model is not None:
-            self.base_model.to(self.device)
-
-        for epoch in range(self.epochs):
+    def train_epochs(self, train_losses: list, val_losses: list) -> None:
+        for epoch in range(1, self.epochs + 1):
             tmp_losses = []
-            for x, y in self.train_data:
+            for x, y in tqdm.tqdm(self.train_data):
                 x, y = x.to(torch.float32).to(self.device), y.to(torch.float32).to(
                     self.device
                 )
@@ -117,17 +110,31 @@ class ChurnTrain:
             train_losses.append(sum(tmp_losses) / len(tmp_losses))
 
             if self.val_data is not None:
-                num_batches = len(self.val_data)
-                val_loss = 0.0
-                with torch.no_grad():
-                    for x, y in self.val_data:
-                        x, y = x.to(torch.float32).to(self.device), y.to(
-                            torch.float32
-                        ).to(self.device)
-                        val_pred = self.model(x)
-                        val_loss += self.loss_fn(val_pred, y).item()
-                    val_loss /= num_batches
-                    val_losses.append(val_loss)
+                self.validate(val_losses)
+
+    def validate(self, val_losses: list) -> None:
+        num_batches = len(self.val_data)
+        val_loss = 0.0
+        with torch.no_grad():
+            for x, y in tqdm.tqdm(self.val_data):
+                x, y = x.to(torch.float32).to(self.device), y.to(torch.float32).to(
+                    self.device
+                )
+                val_pred = self.model(x)
+                val_loss += self.loss_fn(val_pred, y).item()
+            val_loss /= num_batches
+            val_losses.append(val_loss)
+
+    def fit(self) -> dict:
+        train_losses = []
+        val_losses = []
+
+        self.model.to(self.device)
+
+        if self.base_model is not None:
+            self.base_model.to(self.device)
+
+        self.train_epochs(train_losses, val_losses)
 
         self.history["train_losses"] = train_losses
         self.history["val_losses"] = val_losses
