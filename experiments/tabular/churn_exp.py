@@ -15,6 +15,7 @@ class ChurnReduction(ABC):
     """
     Abstract class for labels transformation
     """
+
     def __init__(self, device: str) -> None:
         self.device = device
 
@@ -69,7 +70,7 @@ class AnchorRCP(ChurnReduction):
             self.alpha * y_pred.softmax(1) + (1.0 - self.alpha) * y_true,
             self.eps
             * (
-                (1. - self.alpha) * y_true
+                (1.0 - self.alpha) * y_true
                 + self.alpha
                 / self.classes
                 * torch.ones((len(y_true), self.classes)).to(self.device)
@@ -82,6 +83,7 @@ class Train:
     """
     Class for training models for tabular experiment.
     """
+
     def __init__(
         self,
         train_dataloader: torch.utils.data.DataLoader,
