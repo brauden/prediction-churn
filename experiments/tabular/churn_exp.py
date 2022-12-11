@@ -1,6 +1,6 @@
 """
 Knowledge distillation and anchor RCP labels transformations
-for prediction churn reduction.
+for prediction src reduction.
 """
 from abc import ABC, abstractmethod
 
@@ -15,6 +15,7 @@ class ChurnReduction(ABC):
     """
     Abstract class for labels transformation
     """
+
     def __init__(self, device: str) -> None:
         self.device = device
 
@@ -69,7 +70,7 @@ class AnchorRCP(ChurnReduction):
             self.alpha * y_pred.softmax(1) + (1.0 - self.alpha) * y_true,
             self.eps
             * (
-                (1. - self.alpha) * y_true
+                (1.0 - self.alpha) * y_true
                 + self.alpha
                 / self.classes
                 * torch.ones((len(y_true), self.classes)).to(self.device)
@@ -82,6 +83,7 @@ class Train:
     """
     Class for training models for tabular experiment.
     """
+
     def __init__(
         self,
         train_dataloader: torch.utils.data.DataLoader,
@@ -184,10 +186,10 @@ def experiment_metrics(
     y_true: torch.Tensor, y_teacher: torch.Tensor, y_pred: torch.Tensor
 ) -> dict[str, float]:
     """
-    Metrics that we track during our experiments:
+    Metrics that we track during our src:
     1. Churn
-    2. Good churn
-    3. Bad churn
+    2. Good src
+    3. Bad src
     4. Win loss ratio
     5. Accuracy
 

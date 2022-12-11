@@ -2,7 +2,6 @@ from sklearn.preprocessing import OneHotEncoder
 
 import load_data_train_split
 import build_vocab
-import HyperParams
 import predict_sentiment
 import numpy as np
 import torch

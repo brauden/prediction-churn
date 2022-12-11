@@ -11,8 +11,9 @@
    4.2. [Metrics](#Metrics)  
    4.3. [Models](#Models)  
    4.4. [Results](#Results)  
-5. [Resources](#Resources)  
-6. [Contributors](#Contributors)
+5. [Package](#Package)
+6. [Resources](#Resources)  
+7. [Contributors](#Contributors)
 
 ## Motivation <a name="Motivation"></a>
 It is hard to imagine the modern world without machine learning algorithms, which are used ubiquitously in many industries. For instance, banks use predictive algorithms to score their clients and assess risks. IT giants such as Google and Amazon use complex Deep Neural Networks as essential components of their services - Google Translate, Alexa, Google Photos, self-driving cars, and others. As our lives become more digital, cybersecurity becomes more necessary. An extremely flexible tool, machine learning is used in many different contexts, from simple spam filters to sophisticated methods to detect suspicious activity, spotting attacks, and blocking any malicious intent. There are many reasons why machine learning and deep learning are successful in such a dynamic field: automated algorithms are better adapted for rapid changes than heuristic expert-driven approaches, scalability, and it is easier and faster to tune a machine learning algorithm than to develop a brand new set of rules.  
@@ -47,7 +48,7 @@ To our knowledge the anchor method for churn reduction is one of the first paper
 ``` math
 \hat{y} = 
 \begin{cases}
-\alpha\times y_{teacher} + (1 -\alpha) \times y_{true}, \text{when } y_{teacher} = y_{true} \\
+\alpha\times y_{teacher} + (1 -\alpha) \times y_{true}, \text{when } argmax(y_{teacher}) = argmax(y_{true}) \\
 \epsilon \times y_{true}, \text{otherwise} \\
 \end{cases}
 ```
@@ -57,7 +58,7 @@ The notation is consistent with the knowledge distillation method. However, anch
 ``` math
 \hat{y} = 
 \begin{cases}
-\alpha\times y_{teacher} + (1 -\alpha) \times y_{true}, \text{when } y_{teacher} = y_{true} \\
+\alpha\times y_{teacher} + (1 -\alpha) \times y_{true}, \text{when } argmax(y_{teacher}) = argmax(y_{true}) \\
 \epsilon \times ((1 - \alpha) \times y_{true} + \frac{\alpha}{d}\times \mathbb{1}), \text{where } d \text{ is number of classes and } \mathbb{1} \text{ is a sum vector} \\
 \end{cases}
 ```
@@ -80,17 +81,19 @@ In order to test churn reduction methods we conducted experiments using textual,
 ### Metrics <a name="Metrics"></a>
 1. $`Churn(f_{old}, f_{new}) = \mathbb{E}_{(X, Y) \sim D}{[\mathbb{1}_{f_{old}(X) \neq f_{new}(X)}]}`$
 2. $`ChurnRatio = \frac{Churn(f_{teacher}, f_{student})}{Churn(f_{teacher}, f_{baseline})}`$
-3. $`GoodChurn(f_{old}, f_{new}) = \mathbb{E}_{(X, Y) \sim D}{[\mathbb{1}_{f_{old}(X) \neq Y = f_{new}}]}`$
-4. $`BadChurn(f_{old}, f_{new}) = \mathbb{E}_{(X, Y) \sim D}{[\mathbb{1}_{f_{old}(X) = Y \neq f_{new}}]}`$
+3. $`GoodChurn(f_{old}, f_{new}) = \mathbb{E}_{(X, Y) \sim D}{[\mathbb{1}_{f_{old}(X) \neq Y = f_{new}(X)}]}`$
+4. $`BadChurn(f_{old}, f_{new}) = \mathbb{E}_{(X, Y) \sim D}{[\mathbb{1}_{f_{old}(X) = Y \neq f_{new}(X)}]}`$
 5. $`WinLossRatio = \frac{GoodChurn(f_{old}, f_{new})}{BadChurn(f_{old}, f_{new})}`$
 
 ### Models <a name="Models"></a>
-- Text: [LSTM](experiments/textual/LSTM.py)
+- Text: [LSTM](experiments/textual/lstm.py)
 - Tabular: [Fully Connected Neural Network](experiments/tabular/models.py)
 - Images 
 
 ### Results <a name="Results"></a>
 
+
+## Package <a name="Package"></a>
 
 ## Resources <a name="Resources"></a>
 1. [Heinrich Jiang, Harikrishna Narasimhan, Dara Bahri, Andrew Cotter, Afshin Rostamizadeh. Churn Reduction via Distillation. *arXiv preprint arXiv: 2106.0265v2, 2022*](https://arxiv.org/pdf/2106.02654.pdf)

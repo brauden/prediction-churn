@@ -11,8 +11,6 @@ from sklearn.preprocessing import OneHotEncoder
 
 import load_data_train_split
 import build_vocab
-import Text_Tokenize
-import LSTM
 
 
 def get_accuracy(prediction, label):

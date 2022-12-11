@@ -3,7 +3,6 @@ from sklearn.neighbors import NearestNeighbors
 
 import load_data_train_split
 import build_vocab
-import HyperParams
 import predict_sentiment
 import train_val
 
