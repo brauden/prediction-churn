@@ -1,3 +1,7 @@
+"""
+Training procedure for using with churn reduction transformations.
+"""
+
 from typing import Optional, Union
 
 import torch
@@ -9,6 +13,7 @@ from torch.utils.data import DataLoader, Dataset
 from torch.utils.data.dataset import T_co
 
 from churn.transform import ChurnTransform
+from churn.metrics import ChurnMetric
 
 
 TrainData = Union[tuple[ndarray, ndarray], tuple[Tensor, Tensor], DataLoader]
@@ -27,7 +32,7 @@ class ChurnTrain:
         n_classes: int,
         transform: Optional[ChurnTransform],
         base_model: Optional[nn.Module],
-        metrics,  # TODO: add churn related metrics
+        metrics: ChurnMetric,
         shuffle_train: bool = True,
         shuffle_valid: bool = False,
     ) -> None:
@@ -65,6 +70,15 @@ class ChurnTrain:
         shuffle: bool,
         n_classes: int,
     ) -> DataLoader:
+        """
+        Helper function for creating dataloader if X and y are not in this type.
+        :param train_data: Tuple of X and y tensor/ndarray
+        :param batch_size: Param for dataloader
+        :param shuffle: Param for dataloader
+        :param n_classes: Param for one-hot encoding
+        :return: Creates a dataloader for further training and validation
+        """
+
         class _DataSet(Dataset):
             def __init__(self, data: tuple, classes: int):
                 self.x = torch.tensor(data[0], dtype=torch.float32)
@@ -83,6 +97,12 @@ class ChurnTrain:
         return DataLoader(dset, batch_size=batch_size, shuffle=shuffle)
 
     def train_step(self, x_train: Tensor, y_train: Tensor) -> float:
+        """
+        One training step.
+        :param x_train:
+        :param y_train:
+        :return: loss per step
+        """
         self.model.train()
         preds = self.model(x_train)
         loss = self.loss_fn(preds, y_train)
@@ -92,6 +112,11 @@ class ChurnTrain:
         return loss.item()
 
     def train_epochs(self, train_losses: list, val_losses: list) -> None:
+        """
+        Training loop. Calls self.train_step and self.validate.
+        :param train_losses: list reference to append to train losses
+        :param val_losses: list reference to append to val_losses
+        """
         for epoch in range(1, self.epochs + 1):
             tmp_losses = []
             for x, y in tqdm.tqdm(self.train_data):
@@ -113,6 +138,10 @@ class ChurnTrain:
                 self.validate(val_losses)
 
     def validate(self, val_losses: list) -> None:
+        """
+        Does validation if validation data is provided.
+        :param val_losses: reference to val_losses
+        """
         num_batches = len(self.val_data)
         val_loss = 0.0
         with torch.no_grad():
@@ -126,6 +155,10 @@ class ChurnTrain:
             val_losses.append(val_loss)
 
     def fit(self) -> dict:
+        """
+        Main public method.
+        :return: dict with train_losses and val_losses. #TODO: add churn metrics.
+        """
         train_losses = []
         val_losses = []
 
