@@ -1,3 +1,4 @@
 graft src
-recursive-exclude __pycache__ *.py[cod]
+recursive-exclude src/__pycache__ *.py[cod]
+recursive-exclude src/churn/__pycache__ *.py[cod]
 recursive-include data/figures *.png | *.jpeg
