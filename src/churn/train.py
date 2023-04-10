@@ -20,6 +20,28 @@ TrainData = Union[tuple[ndarray, ndarray], tuple[Tensor, Tensor], DataLoader]
 
 
 class ChurnTrain:
+
+    """
+    Class for using label transformations as a part of a training loop.
+
+    Example:
+        >>> base_model = PreviouslyTrainedModel()
+        >>> model = NewModel()
+        >>> optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+        >>> train = ChurnTrain(model, (X_train, y_train),
+                        (X_val, y_val),
+                        nn.CrossEntropyLoss(),
+                        optimizer,
+                        3,
+                        64,
+                        2,
+                        Distillation(lambda_=0.5),
+                        base_model,
+                        None,
+                    )
+        >>> history = train.fit()
+    """
+
     def __init__(
         self,
         model: nn.Module,

@@ -76,6 +76,12 @@ class Distillation(ChurnTransform):
     The method has one hyperparameter lambda_ and labels transformation
     are in the form:
     y_transformed = lambda * y_teacher + (1 - lambda) * y_true
+
+    Example:
+        >>> y_true = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]])
+        >>> y_base_model = np.array([[11.0, 7.0, -4.0], [7.0, 12.0, 0.5], [1.5, 15.0, 4.0]])
+        >>> transformation = Distillation(lambda_=0.5)
+        >>> y_distilled = transformation.transform(y_true, y_base_model)
     """
 
     def __init__(self, lambda_: float):
@@ -112,6 +118,12 @@ class AnchorRCP(ChurnTransform):
     \alpha\times y_{teacher} + (1 -\alpha) \times y_{true}, \text{when } argmax(y_{teacher}) = argmax(y_{true}) \\
     \epsilon \times ((1 - \alpha) \times y_{true} + \frac{\alpha}{d}\times \mathbb{1}), \text{where } d \text{ is number of classes and } \mathbb{1} \text{ is a sum vector} \\
     \end{cases}
+
+    Example:
+        >>> y_true = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]])
+        >>> y_base_model = np.array([[11.0, 7.0, -4.0], [7.0, 12.0, 0.5], [1.5, 15.0, 4.0]])
+        >>> transformation = AnchorRCP(alpha=0.5, epsilon=1., n_classes=3, smoothing=False)
+        >>> y_distilled = transformation.transform(y_true, y_base_model)
     """
 
     def __init__(

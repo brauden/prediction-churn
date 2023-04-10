@@ -6,7 +6,7 @@ if __name__ == "__main__":
     PATH = "data"  # Assuming that the script is running from the root directory
     urls = [
         "https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz",
-        "https://archive.ics.uci.edu/ml/machine-learning-databases/00332/OnlineNewsPopularity.zip"
+        "https://archive.ics.uci.edu/ml/machine-learning-databases/00332/OnlineNewsPopularity.zip",
     ]
 
     for url in urls:
