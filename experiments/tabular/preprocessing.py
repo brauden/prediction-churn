@@ -33,7 +33,7 @@ class NewsSplitPreprocess:
         train_size: float = 0.7,
         validation: bool = True,
         validation_size: float = 0.3,
-        scale: bool = True
+        scale: bool = True,
     ) -> None:
         self.data = data
         self.seed = seed
