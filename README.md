@@ -45,7 +45,7 @@ Given the wide variety of machine learning models Proofpoint uses, they are inte
 ## Methods <a name="Methods"></a>
 
 ### Overview <a name="Overview"></a>
-All methods we look at are of the class of label-modification. The goal in selecting these methods was to identify effective and easy-to-implement methods for reducing prediction churn in machine learning models. The two methods are: Knowledge distillation ([Jiang et al., 2022](#Distillation-ref)) and Anchor ([Cormier et. al., 2016](#Anchor-ref)). There was a third suitable method: Label smoothing ([Bahri et. al., 2021](#LabelSmoothing-ref)). We choose to omit this method due to its inability to treat modesl as black-boxes.
+All methods we look at are of the class of label-modification. The goal in selecting these methods was to identify effective and easy-to-implement methods for reducing prediction churn in machine learning models. The two methods are: Knowledge distillation ([Jiang et al., 2022](#Distillation-ref)) and Anchor ([Cormier et. al., 2016](#Anchor-ref)). There was a third suitable method: Label smoothing ([Bahri et. al., 2021](#LabelSmoothing-ref)). We choose to omit this method due to its inability to treat models as black-boxes.
 Firstly, we examine the steps and parameters required to implement each method to reduce churn. We then compare the performance of each method quantitatively using metrics defined in the literature.  
 All three methods involve modifying training labels using an older model (referred to as the teacher model). Based on our comparison, we identify two methods that are most effective and continue to develop them further. Specifically, we add additional steps and layers to reduce prediction-churn even lower with the help of available unlabeled data.
 
