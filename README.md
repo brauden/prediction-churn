@@ -107,19 +107,19 @@ In order to test churn reduction methods we conducted experiments using textual,
 
 Here are five  metrics that can be used to effectively measure the success of these methods. Here, $X$ is the dataset features, $Y$ is the dataset labels, $f_{old}$ is original model, $f_{new}$ is the newly trained model, and $f_{baseline}$ is the newly trained model with no special churn-reduction method applied.
 
-1. Churn $(f_{old}, f_{new}) = \mathbb{E}_{(X, Y) \sim D}{[\mathbb{1}_{f_{old}(X) \neq f_{new}(X)}]}$
+1. $Churn = \mathbb{E}_{(X, Y) \sim D}{[\mathbb{1}_{f_{old}(X) \neq f_{new}(X)}]}$
       * Churn is defined as the expected number of disagreements between two models, i.e., it is the proportion of the labels that the new and the old models disagree upon.
 
-2. ChurnRatio $(f_{old}, f_{new}, f_{baseline})= \frac{Churn(f_{old}, f_{new})}{Churn(f_{old}, f_{baseline})}$
+2. $ChurnRatio = \frac{Churn(f_{old}, f_{new})}{Churn(f_{old}, f_{baseline})}$
       * This is a measure of relative improvement in churn, where a lower ratio indicates that the methodology reduces churn more.
 
-3. GoodChurn $(f_{old}, f_{new}) = \mathbb{E}_{(X, Y) \sim D}{[\mathbb{1}_{f_{old}(X) \neq Y = f_{new}(X)}]}$
+3. $GoodChurn = \mathbb{E}_{(X, Y) \sim D}{[\mathbb{1}_{f_{old}(X) \neq Y = f_{new}(X)}]}$
       * Good Churn is the proportion of data points classified correctly by the new model which were misclassified by the old model.
 
-4. BadChurn $(f_{old}, f_{new}) = \mathbb{E}_{(X, Y) \sim D}{[\mathbb{1}_{f_{old}(X) \neq f_{new}(X) \neq Y}]}$
+4. $BadChurn = \mathbb{E}_{(X, Y) \sim D}{[\mathbb{1}_{f_{old}(X) \neq f_{new}(X) \neq Y}]}$
       * Bad Churn is the proportion of data points misclassified by the new model while being different from the classification by the old model.
 
-5. WinLossRatio $(f_{old}, f_{new}, f_{baseline})= \frac{GoodChurn(f_{old}, f_{new})}{BadChurn(f_{old}, f_{new})}$
+5. $WinLossRatio = \frac{GoodChurn(f_{old}, f_{new})}{BadChurn(f_{old}, f_{new})}$
       * Win-Loss Ratio (WLR) captures tradeoff between good churn and bad churn as the ratio between Good Churn and Bad Churn. This is a measure of model performance, where values greater than one indicate the predominance of good churns over bad churns. 
 
 ### Models <a name="Models"></a>
